@@ -13,7 +13,23 @@ const protect = async (req, res, next) => {
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+      // Handle mock admin without DB lookup
+      if (decoded.id === 'vicky_admin_id') {
+        req.user = {
+          _id: 'vicky_admin_id',
+          name: 'Bernardo Portilla',
+          email: 'admin@example.com',
+          isAdmin: true,
+        };
+        return next();
+      }
+
       req.user = await User.findById(decoded.id).select('-password');
+
+      if (!req.user) {
+        res.status(401);
+        throw new Error('Not authorized, user not found');
+      }
 
       next();
     } catch (error) {

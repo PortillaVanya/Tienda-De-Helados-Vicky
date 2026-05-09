@@ -70,6 +70,18 @@ const productSchema = mongoose.Schema(
       default: 0,
       min: 0,
     },
+    stockMinimo: {
+      type: Number,
+      required: true,
+      default: 5,
+      min: 0,
+    },
+    ubicacion: {
+      type: String,
+      required: true,
+      enum: ['Bodega A', 'Vitrina', 'Estante'],
+      default: 'Estante',
+    },
   },
   {
     timestamps: true,

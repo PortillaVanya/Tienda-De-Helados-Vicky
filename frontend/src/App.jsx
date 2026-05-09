@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import ProductPage from './pages/ProductPage';
 import CartPage from './pages/CartPage';
@@ -25,9 +26,25 @@ function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/order/:id" element={<OrderPage />} />
-            <Route path="/admin/dashboard" element={<DashboardPage />} />
+            
+            <Route path="/checkout" element={
+              <ProtectedRoute>
+                <CheckoutPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/order/:id" element={
+              <ProtectedRoute>
+                <OrderPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            } />
+            
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>

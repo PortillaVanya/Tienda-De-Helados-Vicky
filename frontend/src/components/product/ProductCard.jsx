@@ -1,10 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useCart } from '../../context/CartContext';
+import { useCartStore } from '../../stores/useCartStore';
 
 const ProductCard = ({ product }) => {
-  const { addToCart } = useCart();
+  const { addToCart } = useCartStore();
   const navigate = useNavigate();
 
   return (

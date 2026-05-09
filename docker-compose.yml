@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: tienda_virtual_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: inventory_db
+      MYSQL_USER: inventory_user
+      MYSQL_PASSWORD: inventory_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  # MongoDB added for backward compatibility with current Express backend
+  mongo-db:
+    image: mongo:latest
+    container_name: tienda_virtual_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  mongo_data:

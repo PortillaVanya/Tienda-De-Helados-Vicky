@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '../stores/useCartStore';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, Truck, CheckCircle, Smartphone, Landmark, Receipt, Download, Share2 } from 'lucide-react';
 import api from '../services/api';
+import html2pdf from 'html2pdf.js';
 
 const CheckoutPage = () => {
-  const { cartItems, totalPrice, itemsPrice, shippingPrice, taxPrice, clearCart } = useCart();
+  const { cartItems, getItemsPrice, getShippingPrice, getTaxPrice, getTotalPrice, clearCart } = useCartStore();
   const navigate = useNavigate();
+
+  const itemsPrice = getItemsPrice();
+  const shippingPrice = getShippingPrice();
+  const taxPrice = getTaxPrice();
+  const totalPrice = getTotalPrice();
   const [step, setStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState('entrega');
   const [isOrdered, setIsOrdered] = useState(false);
@@ -73,8 +79,16 @@ const CheckoutPage = () => {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleDownloadPDF = () => {
+    const element = document.getElementById('receipt-content');
+    const opt = {
+      margin:       0.5,
+      filename:     `Comprobante_${orderId?.slice(-6).toUpperCase()}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
   };
 
   if (cartItems.length === 0 && !isOrdered) {
@@ -99,6 +113,7 @@ const CheckoutPage = () => {
 
         {/* Digital Receipt / Comprobante */}
         <motion.div 
+          id="receipt-content"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white text-slate-900 rounded-3xl overflow-hidden shadow-2xl border-t-8 border-primary-600 relative"
@@ -175,11 +190,11 @@ const CheckoutPage = () => {
         {/* Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 print:hidden">
           <button 
-            onClick={handlePrint}
+            onClick={handleDownloadPDF}
             className="flex items-center justify-center space-x-2 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all border border-white/10"
           >
             <Download className="w-5 h-5" />
-            <span>Descargar Comprobante</span>
+            <span>Descargar PDF</span>
           </button>
           
           {(paymentMethod === 'online' || paymentMethod === 'pse') && (

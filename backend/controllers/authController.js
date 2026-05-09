@@ -8,34 +8,29 @@ const authUser = async (req, res) => {
   const { email, password } = req.body;
 
   // Mock Admin for Helados Vicky
-  if (email === 'portillajustobernardo@gmail.com' && password === 'admin123') {
+  if (email === 'admin@example.com' && password === 'admin123') {
     return res.json({
       _id: 'vicky_admin_id',
       name: 'Bernardo Portilla',
-      email: 'portillajustobernardo@gmail.com',
+      email: 'admin@example.com',
       isAdmin: true,
       token: generateToken('vicky_admin_id'),
     });
   }
 
-  try {
-    const user = await User.findOne({ email });
+  const user = await User.findOne({ email });
 
-    if (user && (await user.matchPassword(password))) {
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(401);
-      throw new Error('Invalid email or password');
-    }
-  } catch (error) {
-    res.status(500);
-    throw new Error('Database connection error. Try admin@example.com / admin123');
+  if (user && (await user.matchPassword(password))) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(401);
+    throw new Error('Invalid email or password');
   }
 };
 
@@ -72,7 +67,48 @@ const registerUser = async (req, res) => {
   }
 };
 
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateUserProfile = async (req, res) => {
+  // If it's the mock admin, just return the updated body
+  if (req.user._id === 'vicky_admin_id') {
+     res.json({
+       _id: 'vicky_admin_id',
+       name: req.body.name || 'Bernardo Portilla',
+       email: req.body.email || 'admin@example.com',
+       isAdmin: true,
+       token: generateToken('vicky_admin_id'),
+     });
+     return;
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      isAdmin: updatedUser.isAdmin,
+      token: generateToken(updatedUser._id),
+    });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+};
+
 module.exports = {
   authUser,
   registerUser,
+  updateUserProfile,
 };

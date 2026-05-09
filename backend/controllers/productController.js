@@ -22,6 +22,10 @@ const getProducts = async (req, res) => {
       .limit(pageSize)
       .skip(pageSize * (page - 1));
 
+    if (products.length === 0 && !req.query.keyword) {
+      throw new Error('No products found, falling back to sample data');
+    }
+
     res.json({ products, page, pages: Math.ceil(count / pageSize) });
   } catch (error) {
     // If DB fails, return some sample data so the UI doesn't break

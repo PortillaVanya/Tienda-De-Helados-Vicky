@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Loader from '../components/UI/Loader';
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '../stores/useCartStore';
 import { Star, ChevronLeft, ShoppingCart, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart } = useCartStore();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);

@@ -1,11 +1,16 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useCartStore } from '../stores/useCartStore';
 import { Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const CartPage = () => {
-  const { cartItems, addToCart, removeFromCart, itemsPrice, shippingPrice, taxPrice, totalPrice } = useCart();
+  const { cartItems, addToCart, removeFromCart, getItemsPrice, getShippingPrice, getTaxPrice, getTotalPrice } = useCartStore();
   const navigate = useNavigate();
+
+  const itemsPrice = getItemsPrice();
+  const shippingPrice = getShippingPrice();
+  const taxPrice = getTaxPrice();
+  const totalPrice = getTotalPrice();
 
   const checkoutHandler = () => {
     navigate('/login?redirect=/checkout');

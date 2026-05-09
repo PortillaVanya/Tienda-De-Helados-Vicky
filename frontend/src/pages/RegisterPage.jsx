@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { motion } from 'framer-motion';
+import { useAuthStore } from '../stores/useAuthStore';
+import { Button } from '../components/UI/Button';
+import { Input } from '../components/UI/Input';
+import { Card } from '../components/UI/Card';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
 
-  const { register, userInfo } = useAuth();
+  const { register, user, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -19,102 +21,94 @@ const RegisterPage = () => {
   const redirect = redirectParam ? (redirectParam.startsWith('/') ? redirectParam : `/${redirectParam}`) : '/';
 
   useEffect(() => {
-    if (userInfo) {
+    if (user) {
       navigate(redirect);
     }
-  }, [navigate, userInfo, redirect]);
+    clearError();
+    setLocalError('');
+  }, [navigate, user, redirect, clearError]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setLocalError('Las contraseñas no coinciden');
       return;
     }
+    setLocalError('');
     try {
       await register(name, email, password);
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
+    } catch {
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-[70vh] px-4 py-12">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass p-8 md:p-12 rounded-3xl w-full max-w-md border border-white/10 space-y-8"
-      >
+      <Card className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-black text-white">Crear Cuenta</h1>
-          <p className="text-slate-400">Únete a nuestra comunidad hoy mismo</p>
+          <h1 className="text-3xl font-black text-gray-800">Crear Cuenta</h1>
+          <p className="text-gray-600">Únete a nuestra comunidad hoy mismo</p>
         </div>
 
-        {error && <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-sm">{error}</div>}
+        {(error || localError) && (
+          <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl text-sm">
+            {localError || error}
+          </div>
+        )}
 
         <form onSubmit={submitHandler} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-400 ml-1">Nombre Completo</label>
-            <input 
-              type="text" 
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-primary-500 transition-colors text-white"
-              placeholder="Juan Pérez"
-            />
-          </div>
+          <Input
+            label="Nombre Completo"
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Juan Pérez"
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-400 ml-1">Correo Electrónico</label>
-            <input 
-              type="email" 
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-primary-500 transition-colors text-white"
-              placeholder="nombre@ejemplo.com"
-            />
-          </div>
+          <Input
+            label="Correo Electrónico"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="nombre@ejemplo.com"
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-400 ml-1">Contraseña</label>
-            <input 
-              type="password" 
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-primary-500 transition-colors text-white"
-              placeholder="••••••••"
-            />
-          </div>
+          <Input
+            label="Contraseña"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-400 ml-1">Confirmar Contraseña</label>
-            <input 
-              type="password" 
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-primary-500 transition-colors text-white"
-              placeholder="••••••••"
-            />
-          </div>
+          <Input
+            label="Confirmar Contraseña"
+            type="password"
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
+          />
 
-          <button 
+          <Button 
             type="submit"
-            className="w-full py-4 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-2xl transition-all duration-300 shadow-xl shadow-primary-900/20"
+            size="lg"
+            isLoading={isLoading}
+            className="w-full"
           >
             Registrarse
-          </button>
+          </Button>
         </form>
 
-        <div className="text-center text-sm text-slate-500">
+        <div className="text-center text-sm text-gray-600">
           ¿Ya tienes una cuenta?{' '}
-          <Link to={redirect ? `/login?redirect=${redirect}` : '/login'} className="text-primary-400 hover:underline">
+          <Link to={redirect ? `/login?redirect=${redirect}` : '/login'} className="text-pink-500 hover:underline">
             Inicia sesión aquí
           </Link>
         </div>
-      </motion.div>
+      </Card>
     </div>
   );
 };
